@@ -2,11 +2,15 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import formModel from '../models/FormSchema.js';
 import connectDatabase from './database/db.js';
+import cors from 'cors';
 
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cors({
+  origin: 'http://localhost:5173',
+}));
 
 app.get('/', async (req, res) => {
   const dados = await formModel.find()
