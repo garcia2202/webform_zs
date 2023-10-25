@@ -82,7 +82,7 @@ const Formulario = () => {
       };
       try {
         const response = await axios.post("http://localhost:5173/", formData);
-        console.log("Resposta do servidor:", response.data);
+        console.log("Resposta do servidor:", response.formData);
         setShowModal(true);
       } catch (error) {
         console.error("Erro ao enviar os dados:", error);

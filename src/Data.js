@@ -5,26 +5,35 @@ import connectDatabase from './database/db.js';
 import cors from 'cors';
 
 const app = express();
+app.use(cors());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(cors({
-  origin: 'http://localhost:5173',
-}));
+
 
 app.get('/', async (req, res) => {
-  const dados = await formModel.find()
-
-  return res.status(200).json(dados)
+  console.log('GET received')
+  try{
+    const dados = await formModel.find()
+    return res.status(200).json(dados)
+  }
+  catch(error){
+    return res.status(500).json({message: error.message})
+  }
 })
 
 
 app.post('/', async (req, res) => {
-  const data = req.body
-
-  const newData = await formModel.create(data)
-
-  return res.status(201).json(newData)
+  console.log('POST received')
+  let newForm = req.body;
+  console.log(newForm)
+  try{
+    const form = await formModel.create(newForm)
+    return res.status(201).json(form)
+  }
+  catch(error){
+    return res.status(500).json({message: error.message})
+  }
 });
 
 connectDatabase()
