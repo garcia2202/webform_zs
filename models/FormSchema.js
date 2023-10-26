@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const formSchema = new mongoose.Schema({
   dataSolic: {
     type: Date,
+    default: Date.now(),
     required: true
   },
   nomePO: {
