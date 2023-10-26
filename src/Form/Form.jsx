@@ -43,21 +43,21 @@ const Formulario = () => {
     if (!dataSelecionadaSolic) {
       errors.dataSelecionadaSolic = "Este campo é obrigatório.";
     }
-    if (!nomePO.trim()) {
+    else if (!nomePO.trim()) {
       errors.nomePO = "Este campo é obrigatório.";
     }
-    if (!membros.trim()) {
+    else if (!membros.trim()) {
       errors.membros = "Este campo é obrigatório.";
     }
-    if (!dataSelecionadaEntrega) {
+    else if (!dataSelecionadaEntrega) {
       errors.dataSelecionadaEntrega = "Este campo é obrigatório.";
     }
 
-    if (tecnologias.length === 0 && !outraTec.trim()) {
+    else if (tecnologias.length === 0 && !outraTec.trim()) {
       return false;
     }
 
-    if (tecnologias.includes("Outra") && !outraTec.trim()) {
+    else if (tecnologias.includes("Outra") && !outraTec.trim()) {
       return false;
     }
 
