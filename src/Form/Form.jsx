@@ -6,86 +6,63 @@ import "react-datepicker/dist/react-datepicker-cssmodules.css";
 import "./form.css";
 import ptBR from "date-fns/locale/pt-BR";
 import Modal from "react-bootstrap/Modal";
-import axios from "axios";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
 const Formulario = () => {
-  const [dataSelecionadaSolic, setDataSelecionadaSolic] = useState(null);
-  const [nomePO, setNomePO] = useState("");
-  const [membros, setMembros] = useState("");
-  const [dataSelecionadaEntrega, setDataSelecionadaEntrega] = useState(null);
-  const [tecnologias, setTecnologias] = useState([]);
-  const [outraTec, setOutraTec] = useState("");
-  const [contextoUso, setContextoUso] = useState("");
-  const [acessoUsuarios, setAcessoUsuarios] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [listaPedidos, setListaPedidos] = useState([]);
 
-  const dataSolic = (data) => {
-    setDataSelecionadaSolic(data);
-  };
+  const schema = yup.object({
+    startDate: yup.date().required("Campo obrigatório."),
+    nomePO: yup.string().required("Campo obrigatório."),
+    membros: yup.array().of(yup.string()).required("Campo obrigatório."),
+    endDate: yup
+      .date()
+      .required("Campo obrigatório.")
+      .min(
+        yup.ref("startDate"),
+        "A data de entrega deve ser após a data da solicitação."
+      ),
+    tecnologias: yup
+      .array()
+      .of(yup.string())
+      .min(1, "Pelo menos uma tecnologia deve ser informada"),
+    outraTec: yup.string().when("tecnologias", {
+      is: (tecnologias) => tecnologias && tecnologias.includes("outraTecCheck"),
+      then: yup
+        .string()
+        .required('Campo obrigatório caso "Outra" seja selecionado.'),
+      otherwise: yup.string(),
+      contextoUso: yup.string(),
+      acessoUsuario: yup.string(),
+    }),
+  });
 
-  const dataEntrega = (data) => {
-    setDataSelecionadaEntrega(data);
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ resolver: yupResolver(schema) });
 
-  const handleTecnologiasChange = (event) => {
-    const { value, checked } = event.target;
-    if (checked) {
-      setTecnologias([...tecnologias, value]);
-    } else {
-      setTecnologias(tecnologias.filter((tec) => tec !== value));
-    }
-  };
+  function inserirPedido(pedido) {
+    setListaPedidos([...listaPedidos, pedido]);
+  }
 
-  const validateForm = () => {
-    const errors = {};
 
-    if (!dataSelecionadaSolic) {
-      errors.dataSelecionadaSolic = "Este campo é obrigatório.";
-    } else if (!nomePO.trim()) {
-      errors.nomePO = "Este campo é obrigatório.";
-    } else if (!membros.trim()) {
-      errors.membros = "Este campo é obrigatório.";
-    } else if (!dataSelecionadaEntrega) {
-      errors.dataSelecionadaEntrega = "Este campo é obrigatório.";
-    } else if (tecnologias.length === 0 && !outraTec.trim()) {
-      return false;
-    } else if (tecnologias.includes("Outra") && !outraTec.trim()) {
-      return false;
-    }
-
-    setErrors(errors);
-
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const isFormValid = validateForm();
-    if (isFormValid) {
-      const formData = {
-        dataSelecionadaSolic,
-        nomePO,
-        membros,
-        dataSelecionadaEntrega,
-        tecnologias,
-        outraTec,
-        contextoUso,
-        acessoUsuarios,
-      };
-      console.log(formData);
-      try {
-        const response = await axios.post(
-          "http://localhost:8080/sub",
-          formData
-        );
-        console.log("Resposta do servidor:", response.data);
-        setShowModal(true);
-      } catch (error) {
-        console.error("Erro ao enviar os dados:", error);
-      }
-    }
-  };
+  /*
+  async function enviarDados(dados) {
+    const resposta = await fetch("http://localhost:3001/pedidos", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dados),
+    });
+    const resultado = await resposta.json();
+    console.log(resultado);
+  }*/
 
   return (
     <div className="container">
@@ -93,7 +70,7 @@ const Formulario = () => {
         Formulário de solicitação Adequação de Projeto ao Processo DevSecOps
       </h1>
       <br />
-      <Form onSubmit={handleSubmit}>
+      <Form onSubmit={handleSubmit(inserirPedido)}>
         <div>
           <p>
             Oi! Você poderia preencher este formulário? Leva somente 4 minutos.
@@ -104,50 +81,40 @@ const Formulario = () => {
         <br />
         <div className="form_block col-md-6 col-sm-12">
           <h6>
-            1. Data de solicitação (Hoje){" "}
+            1. Data de solicitação (Hoje)
             <span className="caractere-especial">*</span>
           </h6>
           <div className="react-datepicker-wrapper">
             <DatePicker
               className="picker_bar"
-              id="dataSolicitação"
-              name="dataSolicitação"
+              {...register("startDate")}
+              name="dataSolic"
+              id="dataSolic"
               type="date"
-              selected={dataSelecionadaSolic}
-              onChange={dataSolic}
               locale={ptBR}
               dateFormat={"dd/MM/yyyy"}
               placeholderText="Insira a data (dd/MM/yyyy)"
-              required
             />
           </div>
-          <div className="error-message">
-            {errors.dataSelecionadaSolic && (
-              <span>{errors.dataSelecionadaSolic}</span>
-            )}
-          </div>
+          <span>{errors.dataSolic?.message}</span>
           <hr></hr>
           <br />
         </div>
         <div className="form_block col-md-6 col-sm-12">
           <h6>
-            2. Nome Solicitante/PO (responsável pelo projeto)?{" "}
+            2. Nome Solicitante/PO (responsável pelo projeto)?
             <span className="caractere-especial">*</span>
           </h6>
           <div>
             <Form.Control
               type="text"
-              id="nome"
-              name="nome"
-              value={nomePO}
-              onChange={(e) => setNomePO(e.target.value)}
+              {...register("nomePO")}
+              name="nomePO"
+              id="nomePO"
               placeholder="Insira sua resposta"
-              required
             />
           </div>
-          <div className="error-message">
-            {errors.nomePO && <span>{errors.nomePO}</span>}
-          </div>
+          <span>{errors.nomePO?.message}</span>
           <hr></hr>
           <br />
         </div>
@@ -159,51 +126,41 @@ const Formulario = () => {
           <div>
             <Form.Control
               as="textarea"
+              {...register("membros")}
               name="membros"
               id="membros"
               rows={3}
               placeholder="Insira sua resposta"
-              value={membros}
-              onChange={(e) => setMembros(e.target.value)}
-              required
             />
           </div>
-          <div className="error-message">
-            {errors.membros && <span>{errors.membros}</span>}
-          </div>
+          <span>{errors.membros?.message}</span>
         </div>
         <hr></hr>
         <br />
         <div className="form_block col-md-6 col-sm-12">
           <h6>
-            4. Data de entrega da solicitação (necessária){" "}
+            4. Data de entrega da solicitação (necessária)
             <span className="caractere-especial">*</span>
           </h6>
           <div>
             <DatePicker
               className="picker_bar"
-              id="dataEntrega"
+              {...register("endDate")}
               name="dataEntrega"
+              id="dataEntrega"
               type="date"
-              selected={dataSelecionadaEntrega}
-              onChange={dataEntrega}
               locale={ptBR}
               dateFormat={"dd/MM/yyyy"}
               placeholderText="Insira a data (dd/MM/yyyy)"
-              required
             />
           </div>
-          <div className="error-message">
-            {errors.dataSelecionadaEntrega && (
-              <span>{errors.dataSelecionadaEntrega}</span>
-            )}
-          </div>
+          <span>{errors.dataEntrega?.message}</span>
           <hr></hr>
           <br />
         </div>
         <div className="form_block col-md-6 col-sm-12">
           <h6>
-            5. Quais Tecnologias são usadas no projeto?{" "}
+            5. Quais Tecnologias são usadas no projeto?
             <span className="caractere-especial">*</span>
           </h6>
 
@@ -213,93 +170,84 @@ const Formulario = () => {
               id="storageAccount"
               label="Storage Account"
               value="Storage Account"
-              onChange={handleTecnologiasChange}
+              {...register("tecnologias")}
             />
             <Form.Check
               type="checkbox"
               id="AppService(FunctionsApp)"
               label="App Service (Functions App)"
               value="App Service (Functions App)"
-              onChange={handleTecnologiasChange}
+              {...register("tecnologias")}
             />
             <Form.Check
               type="checkbox"
               id="FunctionsApp"
               label="Functions App"
               value="Functions App"
-              onChange={handleTecnologiasChange}
+              {...register("tecnologias")}
             />
             <Form.Check
               type="checkbox"
               id="WebAppWindows"
               label="App Service (WebApp for Windows)"
               value="WebApp Windows"
-              onChange={handleTecnologiasChange}
+              {...register("tecnologias")}
             />
             <Form.Check
               type="checkbox"
               id="WebAppLinux"
               label="App Service (WebApp for Linux)"
               value="WebApp Linux"
-              onChange={handleTecnologiasChange}
+              {...register("tecnologias")}
             />
             <Form.Check
               type="checkbox"
               id="VMs"
               label="Virtual Machines (VM's Linux e Windows)"
               value="VMs"
-              onChange={handleTecnologiasChange}
+              {...register("tecnologias")}
             />
             <Form.Check
               type="checkbox"
               id="ServiceBus"
               label="Service Bus"
               value="Service Bus"
-              onChange={handleTecnologiasChange}
+              {...register("tecnologias")}
             />
             <Form.Check
               type="checkbox"
               id="EventHub"
               label="Event Hub"
               value="EventHub"
-              onChange={handleTecnologiasChange}
+              {...register("tecnologias")}
             />
             <Form.Check
               type="checkbox"
               id="BancoNaoRelacional"
               label="Banco de Dados Não Relacional (NoSQL - Cosmos, Elasticsearch, Redis, etc)"
               value="Banco Não Relacional"
-              onChange={handleTecnologiasChange}
+              {...register("tecnologias")}
             />
             <Form.Check
               type="checkbox"
               id="BancoRelacional"
               label="Bancos de Dados Relacional - SQL"
               value="Banco Relacional"
-              onChange={handleTecnologiasChange}
+              {...register("tecnologias")}
             />
             <div className="inputcheck">
               <Form.Check
                 type="checkbox"
-                id="Outra"
-                value="Outra"
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setTecnologias([...tecnologias, e.target.value]);
-                  } else {
-                    setTecnologias(
-                      tecnologias.filter((tec) => tec !== e.target.value)
-                    );
-                  }
-                }}
+                id="outraTecCheck"
+                value="outraTecCheck"
+                {...register("tecnologias")}
               />
               <Form.Control
                 type="text"
-                placeholder="Outra"
-                id="OutraTec"
-                value={outraTec}
+                placeholder="outraTecText"
+                id="outraTecText"
                 className="text-input-check"
-                onChange={(e) => setOutraTec(e.target.value)}
+                {...register("outraTec")}
               />
             </div>
           </div>
@@ -314,9 +262,7 @@ const Formulario = () => {
           <div>
             <Form.Control
               as="textarea"
-              id="contextoUso"
-              value={contextoUso}
-              onChange={(e) => setContextoUso(e.target.value)}
+              {...register("contextoUso")}
               rows={3}
               placeholder="Insira sua resposta"
             />
@@ -332,9 +278,7 @@ const Formulario = () => {
           <div>
             <Form.Control
               as="textarea"
-              id="acessoUsuario"
-              value={acessoUsuarios}
-              onChange={(e) => setAcessoUsuarios(e.target.value)}
+              {...register("acessoUsuario")}
               rows={3}
               placeholder="Insira sua resposta"
             />
@@ -342,12 +286,7 @@ const Formulario = () => {
           <hr></hr>
           <br />
         </div>
-        {Object.keys(errors).length > 0 && (
-          <div className="error-message alert alert-danger">
-            Por favor, preencha todos os campos obrigatórios.
-          </div>
-        )}
-        <button className="butSubmit" type="submit" onClick={handleSubmit}>
+        <button className="butSubmit" type="submit">
           Enviar
         </button>
       </Form>
@@ -357,6 +296,20 @@ const Formulario = () => {
         </Modal.Header>
         <Modal.Body>O formulário foi enviado com sucesso!</Modal.Body>
       </Modal>
+      <div>
+        {listaPedidos.map((ped, i) => (
+          <div key={i}>
+            <p>dataSolic: {ped.dataSolic}</p>
+            <p>nomePO: {ped.nomePO}</p>
+            <p>membros: {ped.membros}</p>
+            <p>dataEntrega: {ped.dataEntrega}</p>
+            <p>tecnologias: {ped.tecnologias}</p>
+            <p>outraTec: {ped.outraTec}</p>
+            <p>contextoUso: {ped.contextoUso}</p>
+            <p>acessoUsuario: {ped.acessoUsuario}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
