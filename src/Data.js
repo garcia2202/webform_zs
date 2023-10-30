@@ -37,5 +37,5 @@ app.post('/', async (req, res) => {
 });
 
 connectDatabase()
-  .then(() => app.listen(5173, () => console.log('Servidor rodando e Banco de Dados conectado')))
+  .then(() => app.listen(8080, () => console.log('Servidor rodando e Banco de Dados conectado')))
   .catch((error) => console.log(error))

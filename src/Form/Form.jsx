@@ -42,22 +42,15 @@ const Formulario = () => {
 
     if (!dataSelecionadaSolic) {
       errors.dataSelecionadaSolic = "Este campo é obrigatório.";
-    }
-    else if (!nomePO.trim()) {
+    } else if (!nomePO.trim()) {
       errors.nomePO = "Este campo é obrigatório.";
-    }
-    else if (!membros.trim()) {
+    } else if (!membros.trim()) {
       errors.membros = "Este campo é obrigatório.";
-    }
-    else if (!dataSelecionadaEntrega) {
+    } else if (!dataSelecionadaEntrega) {
       errors.dataSelecionadaEntrega = "Este campo é obrigatório.";
-    }
-
-    else if (tecnologias.length === 0 && !outraTec.trim()) {
+    } else if (tecnologias.length === 0 && !outraTec.trim()) {
       return false;
-    }
-
-    else if (tecnologias.includes("Outra") && !outraTec.trim()) {
+    } else if (tecnologias.includes("Outra") && !outraTec.trim()) {
       return false;
     }
 
@@ -80,9 +73,13 @@ const Formulario = () => {
         contextoUso,
         acessoUsuarios,
       };
+      console.log(formData);
       try {
-        const response = await axios.post("http://localhost:5173/sub", formData);
-        console.log("Resposta do servidor:", response.formData);
+        const response = await axios.post(
+          "http://localhost:8080/sub",
+          formData
+        );
+        console.log("Resposta do servidor:", response.data);
         setShowModal(true);
       } catch (error) {
         console.error("Erro ao enviar os dados:", error);
@@ -140,10 +137,10 @@ const Formulario = () => {
           <div>
             <Form.Control
               type="text"
-              id="nomePO"
+              id="nome"
+              name="nome"
               value={nomePO}
               onChange={(e) => setNomePO(e.target.value)}
-              name="nomePO"
               placeholder="Insira sua resposta"
               required
             />
@@ -162,12 +159,12 @@ const Formulario = () => {
           <div>
             <Form.Control
               as="textarea"
+              name="membros"
+              id="membros"
               rows={3}
               placeholder="Insira sua resposta"
-              id="membros"
               value={membros}
               onChange={(e) => setMembros(e.target.value)}
-              name="membros"
               required
             />
           </div>

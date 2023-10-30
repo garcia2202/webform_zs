@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
 const formSchema = new mongoose.Schema({
-  dataSolic: {
+  dataSolicitação: {
     type: Date,
     default: Date.now(),
     required: true
   },
-  nomePO: {
+  nome: {
     type: String,
     required: true
   },
