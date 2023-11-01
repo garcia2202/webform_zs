@@ -58,7 +58,7 @@ const Formulario = () => {
 
   const inserirPedido = async (pedido) => {
     try {
-      const response = await axios.post('http://localhost:3000/api/submit', pedido);
+      const response = await axios.post('http://localhost:3000/submit', pedido);
       console.log("Resposta do servidor:", response.data);
       setListaPedidos([...listaPedidos, pedido]);
       setShowModal(true);
