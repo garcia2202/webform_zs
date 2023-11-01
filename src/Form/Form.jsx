@@ -13,11 +13,13 @@ import * as yup from "yup";
 const Formulario = () => {
   const [showModal, setShowModal] = useState(false);
   const [listaPedidos, setListaPedidos] = useState([]);
+  const [startDateSelecionada, setStartDateSelecionada] = useState("");
+  const [endDateSelecionada, setEndDateSelecionada] = useState("");
 
-  const schema = yup.object({
+  const schema = yup.object().shape({
     startDate: yup.date().required("Campo obrigatório."),
     nomePO: yup.string().required("Campo obrigatório."),
-    membros: yup.array().of(yup.string()).required("Campo obrigatório."),
+    membros: yup.string().required("Campo obrigatório."),
     endDate: yup
       .date()
       .required("Campo obrigatório.")
@@ -29,39 +31,54 @@ const Formulario = () => {
       .array()
       .of(yup.string())
       .min(1, "Pelo menos uma tecnologia deve ser informada"),
-    outraTec: yup.string().when("tecnologias", {
-      is: (tecnologias) => tecnologias && tecnologias.includes("outraTecCheck"),
-      then: yup
-        .string()
-        .required('Campo obrigatório caso "Outra" seja selecionado.'),
-      otherwise: yup.string(),
-      contextoUso: yup.string(),
-      acessoUsuario: yup.string(),
-    }),
+    outraTec: yup.string(),
+    outraTecCheck: yup
+      .boolean()
+      .test(
+        "outra-tec-required",
+        'Campo obrigatório caso "Outra" seja selecionado.',
+        function (value) {
+          if (value === true && !this.parent.outraTec) {
+            return false;
+          }
+          return true;
+        }
+      ),
+    contextoUso: yup.string(),
+    acessoUsuario: yup.string(),
   });
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm({ resolver: yupResolver(schema) });
 
   function inserirPedido(pedido) {
     setListaPedidos([...listaPedidos, pedido]);
   }
-
-
-  /*
-  async function enviarDados(dados) {
-    const resposta = await fetch("http://localhost:3001/pedidos", {
+  /*function enviarDados(data) {
+    fetch("http://localhost:3001/pedidos", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(dados),
-    });
-    const resultado = await resposta.json();
-    console.log(resultado);
+      body: JSON.stringify(data),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Erro :(");
+        }
+        return res.json();
+      })
+      .then(() => {
+        console.log(data);
+        setShowModal(true);
+      })
+      .catch((error) => {
+        console.error("Erro ao enviar os dados", error);
+      });
   }*/
 
   return (
@@ -88,15 +105,19 @@ const Formulario = () => {
             <DatePicker
               className="picker_bar"
               {...register("startDate")}
-              name="dataSolic"
-              id="dataSolic"
-              type="date"
+              name="startDate"
+              id="startDate"
+              selected={startDateSelecionada}
+              onChange={(date) => {
+                setStartDateSelecionada(date);
+                setValue("startDate", date);
+              }}
               locale={ptBR}
               dateFormat={"dd/MM/yyyy"}
               placeholderText="Insira a data (dd/MM/yyyy)"
             />
           </div>
-          <span>{errors.dataSolic?.message}</span>
+          <span>{errors.startDate?.message}</span>
           <hr></hr>
           <br />
         </div>
@@ -149,12 +170,17 @@ const Formulario = () => {
               name="dataEntrega"
               id="dataEntrega"
               type="date"
+              selected={endDateSelecionada}
+              onChange={(date) => {
+                setEndDateSelecionada(date);
+                setValue("endDate", date);
+              }}
               locale={ptBR}
               dateFormat={"dd/MM/yyyy"}
               placeholderText="Insira a data (dd/MM/yyyy)"
             />
           </div>
-          <span>{errors.dataEntrega?.message}</span>
+          <span>{errors.endDate?.message}</span>
           <hr></hr>
           <br />
         </div>
@@ -244,7 +270,7 @@ const Formulario = () => {
               />
               <Form.Control
                 type="text"
-                placeholder="outraTecText"
+                placeholder="Outra"
                 id="outraTecText"
                 className="text-input-check"
                 {...register("outraTec")}
@@ -299,11 +325,11 @@ const Formulario = () => {
       <div>
         {listaPedidos.map((ped, i) => (
           <div key={i}>
-            <p>dataSolic: {ped.dataSolic}</p>
+            <p>dataSolic: {ped.startDate.toLocaleDateString()}</p>
             <p>nomePO: {ped.nomePO}</p>
             <p>membros: {ped.membros}</p>
-            <p>dataEntrega: {ped.dataEntrega}</p>
-            <p>tecnologias: {ped.tecnologias}</p>
+            <p>dataEntrega: {ped.endDate.toLocaleDateString()}</p>
+            <p>tecnologias: {ped.tecnologias.join(", ")}</p>
             <p>outraTec: {ped.outraTec}</p>
             <p>contextoUso: {ped.contextoUso}</p>
             <p>acessoUsuario: {ped.acessoUsuario}</p>

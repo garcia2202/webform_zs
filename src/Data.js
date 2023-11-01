@@ -1,3 +1,4 @@
+/*
 import express from 'express';
 import bodyParser from 'body-parser';
 import formModel from '../models/FormSchema.js';
@@ -39,3 +40,4 @@ app.post('/', async (req, res) => {
 connectDatabase()
   .then(() => app.listen(8080, () => console.log('Servidor rodando e Banco de Dados conectado')))
   .catch((error) => console.log(error))
+*/
