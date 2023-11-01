@@ -9,6 +9,7 @@ import Modal from "react-bootstrap/Modal";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import axios from "axios";
 
 const Formulario = () => {
   const [showModal, setShowModal] = useState(false);
@@ -55,31 +56,16 @@ const Formulario = () => {
     setValue,
   } = useForm({ resolver: yupResolver(schema) });
 
-  function inserirPedido(pedido) {
-    setListaPedidos([...listaPedidos, pedido]);
-  }
-  /*function enviarDados(data) {
-    fetch("http://localhost:3001/pedidos", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Erro :(");
-        }
-        return res.json();
-      })
-      .then(() => {
-        console.log(data);
-        setShowModal(true);
-      })
-      .catch((error) => {
-        console.error("Erro ao enviar os dados", error);
-      });
-  }*/
+  const inserirPedido = async (pedido) => {
+    try {
+      const response = await axios.post('http://localhost:3000/api/submit', pedido);
+      console.log("Resposta do servidor:", response.data);
+      setListaPedidos([...listaPedidos, pedido]);
+      setShowModal(true);
+    } catch (error) {
+      console.error("Erro ao enviar os dados:", error);
+    }
+  };
 
   return (
     <div className="container">
@@ -322,7 +308,7 @@ const Formulario = () => {
         </Modal.Header>
         <Modal.Body>O formulário foi enviado com sucesso!</Modal.Body>
       </Modal>
-      <div>
+      {/* <div>
         {listaPedidos.map((ped, i) => (
           <div key={i}>
             <p>dataSolic: {ped.startDate.toLocaleDateString()}</p>
@@ -335,7 +321,7 @@ const Formulario = () => {
             <p>acessoUsuario: {ped.acessoUsuario}</p>
           </div>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };
