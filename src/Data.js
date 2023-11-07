@@ -54,27 +54,17 @@ app.post('/submit', async (req, res) => {
   try{
     const novoPedido = new formModel(req.body);
     await novoPedido.save();
-    res.send('Dados enviados ao MongoDB!');
+    res.send('Dados enviados ao CosmosDB!');
   }
   catch (error) {
     res.status(500).send(error.message);
   }
 });
 
-// app.post('/submit', (req, res) => {
-//   const data = req.body;
-//   const { error, value } = formSchema.validate(data);
-//   if (error) {
-//     return res.status(400).json({ error: error.details.map(detail => detail.message) })
-//   }
-//   console.log('Dados recebidos:', value);
-//   res.status(200).json({ message: 'Dados recebidos com sucesso!',});
-// });
-
 const PORT = 3000;
 connectDatabase()
   .then(() => {
-    console.log('Conectado ao MongoDB!');
+    console.log('Conectado ao CosmosDB!');
   });
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`)
