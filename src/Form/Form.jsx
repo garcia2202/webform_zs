@@ -32,6 +32,7 @@ const Formulario = () => {
       .array()
       .of(yup.string())
       .min(1, "Pelo menos uma tecnologia deve ser informada"),
+    linguagens: yup.string().required("Campo obrigatório."),
     outraTec: yup.string(),
     outraTecCheck: yup
       .boolean()
@@ -58,7 +59,7 @@ const Formulario = () => {
 
   const inserirPedido = async (pedido) => {
     try {
-      const response = await axios.post('http://localhost:3000/submit', pedido);
+      const response = await axios.post("http://localhost:3000/", pedido);
       console.log("Resposta do servidor:", response.data);
       setListaPedidos([...listaPedidos, pedido]);
       setShowModal(true);
@@ -74,13 +75,6 @@ const Formulario = () => {
       </h1>
       <br />
       <Form onSubmit={handleSubmit(inserirPedido)}>
-        <div>
-          <p>
-            Oi! Você poderia preencher este formulário? Leva somente 4 minutos.
-            Seria ótimo se você pudesse enviar sua resposta até ?? de ????? de
-            ????. Obrigado!
-          </p>
-        </div>
         <br />
         <div className="form_block col-md-6 col-sm-12">
           <h6>
@@ -186,13 +180,6 @@ const Formulario = () => {
             />
             <Form.Check
               type="checkbox"
-              id="AppService(FunctionsApp)"
-              label="App Service (Functions App)"
-              value="App Service (Functions App)"
-              {...register("tecnologias")}
-            />
-            <Form.Check
-              type="checkbox"
               id="FunctionsApp"
               label="Functions App"
               value="Functions App"
@@ -201,14 +188,14 @@ const Formulario = () => {
             <Form.Check
               type="checkbox"
               id="WebAppWindows"
-              label="App Service (WebApp for Windows)"
+              label="WebApp Windows"
               value="WebApp Windows"
               {...register("tecnologias")}
             />
             <Form.Check
               type="checkbox"
               id="WebAppLinux"
-              label="App Service (WebApp for Linux)"
+              label="WebApp Linux"
               value="WebApp Linux"
               {...register("tecnologias")}
             />
@@ -268,8 +255,36 @@ const Formulario = () => {
         </div>
         <div className="form_block col-md-12">
           <h6>
-            6. Para App Service(opção 2-5 do formulário acima), descreva o
-            contexto de uso da aplicação (Dependências Storage Account, BD, etc)
+            6. Quais linguagens de programação serão usadas no projeto?{" "}
+            <span className="caractere-especial">*</span>
+          </h6>
+          <div>
+            <Form.Select>
+              <option>Escolha uma linguagem</option>
+              <option id=".net" value=".net" {...register("linguagens")}>
+                .Net
+              </option>
+              <option id="Java" value="Java" {...register("linguagens")}>
+                Java
+              </option>
+            </Form.Select>
+            {/* <Form.Check type="checkbox" />
+            <Form.Check type="checkbox" />
+            <Form.Check type="checkbox" />
+            <Form.Check type="checkbox" />
+            <div className="inputcheck">
+              <Form.Check type="checkbox" />
+              <Form.Control type="text" className="text-input-check" />
+            </div> */}
+            <span>{errors.linguagens?.message}</span>
+            <hr></hr>
+            <br />
+          </div>
+        </div>
+        <div className="form_block col-md-12">
+          <h6>
+            7. Para App Service, descreva o contexto de uso da aplicação
+            (Dependências Storage Account, BD, etc)
           </h6>
           <div>
             <Form.Control
@@ -284,7 +299,7 @@ const Formulario = () => {
         </div>
         <div className="form_block col-md-12">
           <h6>
-            7. Ainda sobre App Service, aplicação será acessado por usuário? Se
+            8. Ainda sobre App Service, aplicação será acessado por usuário? Se
             sim, usuários internos e/ou externos?
           </h6>
           <div>
@@ -308,20 +323,6 @@ const Formulario = () => {
         </Modal.Header>
         <Modal.Body>O formulário foi enviado com sucesso!</Modal.Body>
       </Modal>
-      {/* <div>
-        {listaPedidos.map((ped, i) => (
-          <div key={i}>
-            <p>dataSolic: {ped.startDate.toLocaleDateString()}</p>
-            <p>nomePO: {ped.nomePO}</p>
-            <p>membros: {ped.membros}</p>
-            <p>dataEntrega: {ped.endDate.toLocaleDateString()}</p>
-            <p>tecnologias: {ped.tecnologias.join(", ")}</p>
-            <p>outraTec: {ped.outraTec}</p>
-            <p>contextoUso: {ped.contextoUso}</p>
-            <p>acessoUsuario: {ped.acessoUsuario}</p>
-          </div>
-        ))}
-      </div> */}
     </div>
   );
 };

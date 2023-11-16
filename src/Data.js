@@ -34,6 +34,10 @@ const FormSchema = new mongoose.Schema({
     type: Boolean,
     required: false,
   },
+  linguagens: {
+    type: String,
+    required: false,
+  },
   outraTec: {
     type: String,
     required: false,
@@ -50,22 +54,51 @@ const FormSchema = new mongoose.Schema({
 
 const formModel = mongoose.model('formModel', FormSchema)
 
-app.post('/submit', async (req, res) => {
-  try{
-    const novoPedido = new formModel(req.body);
-    await novoPedido.save();
-    res.send('Dados enviados ao CosmosDB!');
-  }
-  catch (error) {
-    res.status(500).send(error.message);
-  }
-});
+// app.post('/submit', async (req, res) => {
+//   try {
+//     const novoPedido = new formModel(req.body);
+//     await novoPedido.save();
+//     res.send('Dados enviados ao CosmosDB!');
+//   }
+//   catch (error) {
+//     res.status(500).send(error.message);
+//   }
+// });
+
+// const PORT = 5173;
+// connectDatabase()
+//   .then(() => {
+//     console.log('Conectado ao CosmosDB!');
+//   });
+// app.listen(PORT, () => {
+//   console.log(`Servidor rodando na porta ${PORT}`)
+// })
 
 const PORT = 3000;
+
+async function startServer() {
+  try {
+    await connectDatabase();
+    console.log('Conectado no CosmosDB!');
+    
+    app.listen(PORT, () => {
+      console.log(`Servidor rodando na porta ${PORT}`);
+    });
+
+    app.post('/', async (req, res) => {
+      try {
+        const novoPedido = new formModel(req.body);
+        await novoPedido.save();
+        res.send('Dados enviados ao CosmosDB!');
+      } catch (error) {
+        console.error(error);
+        res.status(500).send(error.message);
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao conectar ao CosmosDB:', error);
+  }
+}
+
+startServer();
 connectDatabase()
-  .then(() => {
-    console.log('Conectado ao CosmosDB!');
-  });
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`)
-})
